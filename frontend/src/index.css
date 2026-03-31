@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --color-apple-bg: #f5f5f7;
+  --color-apple-card: #ffffff;
+  --color-apple-text: #1d1d1f;
+  --color-apple-secondary: #6e6e73;
+  --color-apple-tertiary: #86868b;
+  --color-apple-border: #d2d2d7;
+  --color-apple-blue: #0071e3;
+  --color-apple-blue-hover: #0077ed;
+  --color-apple-blue-light: #e8f1fb;
+  --color-apple-green: #34c759;
+  --color-apple-orange: #ff9500;
+  --color-apple-red: #ff3b30;
+  --color-apple-sidebar: #f9f9f9;
+  --color-apple-sidebar-active: #e8e8ed;
+
+  /* Extended tokens — used frequently but were previously unhardcoded */
+  --color-card-border: #e8e8ed;    /* card outlines, page section borders */
+  --color-divider: #f2f2f7;        /* list row dividers */
+  --color-chip-bg: #f2f2f7;        /* pill/tag/chip background */
+  --color-chip-text: #3a3a3c;      /* pill/tag/chip foreground */
+  --color-caption: #aeaeb2;        /* light captions, timestamps */
+  --color-input-bg: #f9f9f9;       /* input field background */
+  --color-apple-green-bg: #edfaf1; /* success state background */
+  --color-apple-orange: #ff9500;   /* warning / tax accent (alias) */
+  --color-apple-tax-bg: #fff5e6;   /* tax badge background */
+  --color-apple-tax-text: #b35a00; /* tax badge foreground */
+  --color-apple-tip-bg: #e8f1fb;   /* tip badge background (reuses blue-light) */
+  --color-apple-tip-text: #1a6080; /* tip badge foreground */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #aeaeb2; }
+
+/* Inputs */
+input, textarea, select {
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+}
