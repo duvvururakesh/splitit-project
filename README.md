@@ -2,13 +2,6 @@
 
 An expense splitting web app — scan receipts, assign items to people, and see exactly who owes what.
 
-## What it does
-
-- Upload one or multiple receipt photos — OCR scans them automatically via Claude Vision API
-- Assign each item to specific people (or split across all)
-- Tax and tip are auto-distributed equally
-- Saves splits to Activity feed with full breakdown
-- Contacts book to manage people you split with
 
 ## Tech Stack
 
@@ -84,15 +77,7 @@ cd backend
 alembic upgrade head
 ```
 
-## Key Design Decisions
 
-- USD only
-- No admin roles — everyone in a group has equal power
-- Debt simplification is an optional toggle per group
-- Anyone can mark a debt as settled
-- Receipt scanning: upload photo or use QR code (phone camera → WebSocket back to desktop)
-- One receipt item can be split among multiple people
-- Both in-app and email notifications
 
 ## Project Structure
 
