@@ -27,6 +27,7 @@ class UserResponse(BaseModel):
     display_name: str
     phone_number: str | None = None
     avatar_url: str | None = None
+    is_guest: bool = False
 
     model_config = {"from_attributes": True}
 

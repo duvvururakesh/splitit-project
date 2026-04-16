@@ -18,5 +18,8 @@ class User(Base):
     avatar_url = Column(String, nullable=True)
     google_id = Column(String, unique=True, nullable=True)
     is_active = Column(Boolean, default=True)
+    is_guest = Column(Boolean, default=False)
+    password_reset_token = Column(String, nullable=True)
+    password_reset_expires = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

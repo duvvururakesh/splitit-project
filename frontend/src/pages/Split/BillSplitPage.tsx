@@ -5,8 +5,6 @@ import { useContactsStore } from '../../store/contacts.store'
 import { uploadReceipt, scanReceipt } from '../../api/receipts'
 import { createBillSplit, updateBillSplit, listBillSplits, deleteBillSplit } from '../../api/billSplits'
 import type { BillSplitResponse } from '../../api/billSplits'
-import { getMe } from '../../api/auth'
-import { useAuthStore } from '../../store/auth.store'
 import { avatarColor } from '../../utils/avatar'
 import { IconPencil, IconTrash, iconBtnEdit, iconBtnDelete } from '../../utils/icons'
 
@@ -135,8 +133,7 @@ export default function BillSplitPage() {
 
   const { contacts, groups: contactGroups } = useContactsStore()
   const [showDropdown, setShowDropdown] = useState(false)
-  useAuthStore(s => s.token) // keep store subscribed for auth
-  const { data: me } = useQuery({ queryKey: ['me'], queryFn: getMe })
+  const me = null
 
   // ── Saved splits ────────────────────────────────────────────────────────────
   const savedSplitsQuery = useQuery({

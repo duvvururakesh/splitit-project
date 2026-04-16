@@ -28,6 +28,21 @@ def create_access_token(user_id: str) -> str:
     return jwt.encode({"sub": user_id, "exp": expire}, settings.SECRET_KEY, algorithm="HS256")
 
 
+@router.post("/guest", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+def guest_login(db: Session = Depends(get_db)):
+    """Create a throwaway guest user and return a short-lived JWT."""
+    import uuid as _uuid
+    user = User(
+        email=f"guest_{_uuid.uuid4()}@guest.local",
+        display_name="Guest",
+        is_guest=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return TokenResponse(access_token=create_access_token(str(user.id)))
+
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def register(body: RegisterRequest, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == body.email).first():
@@ -97,3 +112,49 @@ def update_me(
     db.commit()
     db.refresh(current_user)
     return current_user
+
+
+# ─── Password Reset ────────────────────────────────────────────────────────────
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+@router.post("/forgot-password", status_code=200)
+def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    import secrets
+    user = db.query(User).filter(User.email == body.email).first()
+    # Always return success even if email not found (prevents user enumeration)
+    if not user or user.is_guest:
+        return {"message": "If that email exists, a reset link has been sent."}
+
+    token = secrets.token_urlsafe(32)
+    user.password_reset_token = token
+    user.password_reset_expires = datetime.utcnow() + timedelta(hours=1)
+    db.commit()
+
+    # TODO: send email — for now print to console so you can use it during dev
+    print(f"\n[PASSWORD RESET] Token for {user.email}: {token}\n")
+
+    return {"message": "If that email exists, a reset link has been sent."}
+
+
+@router.post("/reset-password", status_code=200)
+def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+    if len(body.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+
+    user = db.query(User).filter(User.password_reset_token == body.token).first()
+    if not user or not user.password_reset_expires or user.password_reset_expires < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Reset link is invalid or has expired")
+
+    user.password_hash = hash_password(body.new_password)
+    user.password_reset_token = None
+    user.password_reset_expires = None
+    db.commit()
+    return {"message": "Password updated successfully"}

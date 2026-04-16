@@ -4,3 +4,4 @@ from app.models.group import Group, GroupMember
 from app.models.expense import Expense, ExpenseParticipant, Settlement
 from app.models.receipt import Receipt, ReceiptItem, ReceiptItemAssignment
 from app.models.bill_split import BillSplit
+from app.models.contact import UserContact, UserContactGroup

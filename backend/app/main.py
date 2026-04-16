@@ -11,6 +11,7 @@ from app.routes.receipts import router as receipts_router
 from app.routes.mobile import router as mobile_router
 from app.routes.ws import router as ws_router
 from app.routes.bill_splits import router as bill_splits_router
+from app.routes.contacts import router as contacts_router
 
 app = FastAPI(title="Splitit API", version="0.1.0")
 
@@ -30,6 +31,7 @@ app.include_router(settlements_router, prefix="/api")
 app.include_router(receipts_router, prefix="/api")
 app.include_router(mobile_router, prefix="/api")
 app.include_router(bill_splits_router, prefix="/api")
+app.include_router(contacts_router, prefix="/api")
 app.include_router(ws_router)
 
 # Serve uploaded receipt images

@@ -1,7 +1,4 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { useAuthStore } from '../../store/auth.store'
-import { getMe } from '../../api/auth'
 import { avatarColor } from '../../utils/avatar'
 
 const links = [
@@ -41,10 +38,9 @@ const links = [
 ]
 
 export default function Sidebar() {
-  const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
   const location = useLocation()
-  const { data: me } = useQuery({ queryKey: ['me'], queryFn: getMe })
+  const me = null
 
   return (
     <aside className="w-[220px] shrink-0 bg-[#f9f9f9] border-r border-[#e8e8ed] flex flex-col h-screen sticky top-0">
