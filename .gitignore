@@ -41,5 +41,9 @@ npm-debug.log*
 # Uploaded receipt images
 backend/app/uploads/
 
-# Claude
-.claude/settings.local.json
+# Local agent configs
+.claude/
+.codex/settings.local.json
+
+# Local database artifact
+backend/splitit.db

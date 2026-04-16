@@ -18,7 +18,6 @@ class Settings(BaseSettings):
     R2_BUCKET_NAME: str = "splitit-receipts"
     R2_PUBLIC_URL: str = ""
 
-    ANTHROPIC_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
 
     APP_URL: str = "http://localhost:5173"

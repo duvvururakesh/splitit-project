@@ -11,7 +11,7 @@ An expense splitting web app — scan receipts, assign items to people, and see 
 | Backend | Python + FastAPI |
 | ORM | SQLAlchemy + Alembic |
 | Database | PostgreSQL |
-| AI / OCR | Claude Vision API |
+| AI / OCR | Gemini Vision API |
 | Auth | JWT + Google OAuth |
 | Storage | Cloudflare R2 |
 | Queue | Celery + Redis |
@@ -57,7 +57,7 @@ Create `backend/.env`:
 ```
 DATABASE_URL=postgresql://user:password@localhost/splitit
 SECRET_KEY=your_jwt_secret
-ANTHROPIC_API_KEY=your_claude_api_key
+GEMINI_API_KEY=your_gemini_api_key
 CLOUDFLARE_R2_ACCESS_KEY=...
 CLOUDFLARE_R2_SECRET_KEY=...
 CLOUDFLARE_R2_BUCKET=...

@@ -40,7 +40,7 @@ Splitit is a web app to track shared expenses between friends and groups, with A
 - Two ways to scan:
   1. **Upload** — user uploads an image directly from desktop
   2. **QR Code** — desktop shows a QR code, user scans with phone, phone camera opens, photo is taken and sent back to desktop in real time (via WebSockets)
-- AI (Claude Vision API) extracts line items (name, quantity, price)
+- AI (Gemini Vision API) extracts line items (name, quantity, price)
 - User reviews and corrects extracted items
 - Each item can be assigned to one or more people (shared items split equally among assignees)
 - Tax and tip lines distributed proportionally
@@ -93,7 +93,7 @@ Splitit is a web app to track shared expenses between friends and groups, with A
 | Backend        | Python + FastAPI                  |
 | ORM            | SQLAlchemy + Alembic (migrations) |
 | Database       | PostgreSQL                        |
-| AI / OCR       | Claude Vision API (Anthropic)     |
+| AI / OCR       | Gemini Vision API (Google)        |
 | Auth           | JWT + Google OAuth                |
 | File Storage   | Cloudflare R2 (receipt images)    |
 | Async Queue    | Celery + Redis                    |
@@ -182,7 +182,7 @@ Desktop Web App                Phone                    Backend
 ### Stage 4 — Receipt Scanning
 - Image upload flow
 - QR code + WebSocket camera flow
-- Claude Vision OCR integration (Celery worker)
+- Gemini Vision OCR integration (Celery worker)
 - Item review + assignment UI
 - Itemized expense creation
 
