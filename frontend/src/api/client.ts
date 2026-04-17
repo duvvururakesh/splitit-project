@@ -1,8 +1,10 @@
 import axios from 'axios'
 import { useAuthStore } from '../store/auth.store'
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || ''
+
 const client = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE ? `${API_BASE}/api` : '/api',
   withCredentials: true,
 })
 

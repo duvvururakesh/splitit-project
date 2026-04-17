@@ -15,9 +15,12 @@ from app.routes.contacts import router as contacts_router
 
 app = FastAPI(title="Splitit API", version="0.1.0")
 
+origins = [o.strip() for o in (settings.APP_URL or "").split(",") if o.strip()]
+origins += ["http://localhost:5173", "http://localhost:5175"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.APP_URL, "http://localhost:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
