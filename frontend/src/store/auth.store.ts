@@ -24,12 +24,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   // Guest token: stored in sessionStorage (clears when tab closes)
   setGuestToken: (token) => {
+    localStorage.removeItem('access_token')
     sessionStorage.setItem('access_token', token)
     set({ token, isGuest: true })
   },
 
   // Real user token: stored in localStorage (persists)
   setToken: (token) => {
+    sessionStorage.removeItem('access_token')
     localStorage.setItem('access_token', token)
     set({ token, isGuest: false })
   },

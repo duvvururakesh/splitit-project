@@ -1,12 +1,15 @@
 from datetime import date as date_type, datetime
 from decimal import Decimal
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models.expense import Expense, ExpenseParticipant, Settlement
+from app.models.friendship import Friendship
 from app.models.group import GroupMember
 from app.models.user import User
 from app.schemas.expenses import (
@@ -22,6 +25,65 @@ from app.services.balance import get_balances_for_user
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 settlements_router = APIRouter(prefix="/settlements", tags=["settlements"])
+
+
+def _parse_uuid_or_422(value: str, field: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(value)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=422, detail=f"Invalid {field}")
+
+
+def _validate_participants_and_permissions(
+    *,
+    current_user: User,
+    db: Session,
+    group_id: str | None,
+    paid_by: str,
+    participant_ids: list[str],
+) -> None:
+    paid_by_uuid = _parse_uuid_or_422(paid_by, "paid_by")
+    participant_uuids = [_parse_uuid_or_422(uid, "participant_id") for uid in participant_ids]
+    all_user_ids = {paid_by_uuid, *participant_uuids}
+
+    users_found = db.query(User).filter(User.id.in_(list(all_user_ids))).all()
+    found_ids = {u.id for u in users_found}
+    if found_ids != all_user_ids:
+        raise HTTPException(status_code=400, detail="One or more users are invalid")
+
+    if group_id:
+        group_uuid = _parse_uuid_or_422(group_id, "group_id")
+        memberships = db.query(GroupMember).filter(
+            GroupMember.group_id == group_uuid,
+            GroupMember.user_id.in_(list(all_user_ids)),
+        ).all()
+        member_ids = {m.user_id for m in memberships}
+        if member_ids != all_user_ids:
+            raise HTTPException(status_code=403, detail="All participants and payer must be group members")
+        if current_user.id not in member_ids:
+            raise HTTPException(status_code=403, detail="You are not in this group")
+    else:
+        # Non-group expense: allow only current user + accepted friends.
+        if current_user.id not in all_user_ids:
+            raise HTTPException(status_code=403, detail="You must be included in a direct expense")
+        if len(all_user_ids) == 1:
+            return
+        friendships = db.query(Friendship).filter(
+            Friendship.status == "accepted",
+            or_(
+                and_(Friendship.requester_id == current_user.id, Friendship.addressee_id.in_(list(all_user_ids))),
+                and_(Friendship.addressee_id == current_user.id, Friendship.requester_id.in_(list(all_user_ids))),
+            ),
+        ).all()
+        friend_ids = set()
+        for f in friendships:
+            if f.requester_id == current_user.id:
+                friend_ids.add(f.addressee_id)
+            elif f.addressee_id == current_user.id:
+                friend_ids.add(f.requester_id)
+        non_friend_others = {uid for uid in all_user_ids if uid != current_user.id and uid not in friend_ids}
+        if non_friend_others:
+            raise HTTPException(status_code=403, detail="Direct expenses allow only accepted friends")
 
 
 def _expense_to_response(expense: Expense) -> ExpenseResponse:
@@ -52,14 +114,18 @@ def _expense_to_response(expense: Expense) -> ExpenseResponse:
 
 @router.post("/", response_model=ExpenseResponse, status_code=201)
 def create_expense(body: CreateExpenseRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Validate group membership if group expense
-    if body.group_id:
-        membership = db.query(GroupMember).filter(
-            GroupMember.group_id == body.group_id,
-            GroupMember.user_id == current_user.id,
-        ).first()
-        if not membership:
-            raise HTTPException(status_code=403, detail="You are not in this group")
+    participant_ids_for_validation = (
+        body.participant_ids
+        if body.split_method == "equal"
+        else [p.user_id for p in body.participants]
+    )
+    _validate_participants_and_permissions(
+        current_user=current_user,
+        db=db,
+        group_id=body.group_id,
+        paid_by=body.paid_by,
+        participant_ids=participant_ids_for_validation,
+    )
 
     expense = Expense(
         group_id=body.group_id,
@@ -190,9 +256,23 @@ def update_expense(
 
     # If participants provided, replace them
     if body.participants is not None or body.participant_ids is not None:
+        split = body.split_method or expense.split_method
+        participant_ids_for_validation = (
+            (body.participant_ids or [])
+            if split == "equal"
+            else [p.user_id for p in (body.participants or [])]
+        )
+        if participant_ids_for_validation:
+            _validate_participants_and_permissions(
+                current_user=current_user,
+                db=db,
+                group_id=(body.group_id if body.group_id is not None else (str(expense.group_id) if expense.group_id else None)),
+                paid_by=(body.paid_by if body.paid_by is not None else str(expense.paid_by)),
+                participant_ids=participant_ids_for_validation,
+            )
+
         db.query(ExpenseParticipant).filter(ExpenseParticipant.expense_id == expense.id).delete()
         total = Decimal(str(body.total_amount or expense.total_amount))
-        split = body.split_method or expense.split_method
 
         if split == "equal":
             ids = body.participant_ids or []

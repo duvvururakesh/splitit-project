@@ -1,10 +1,16 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { getMe, updateMe } from '../../api/auth'
+import { getMe, logoutAllApi, logoutApi, updateMe } from '../../api/auth'
 import { useAuthStore } from '../../store/auth.store'
 import { avatarColor } from '../../utils/avatar'
-import { IconPencil, iconBtnEdit } from '../../utils/icons'
+import { IconPencil, IconTrash } from '../../utils/icons'
+import PageHeader from '../../components/ui/PageHeader'
+import PageContainer from '../../components/ui/PageContainer'
+import Card from '../../components/ui/Card'
+import Button from '../../components/ui/Button'
+import IconButton from '../../components/ui/IconButton'
+import Input from '../../components/ui/Input'
 
 export default function AccountPage() {
   const navigate = useNavigate()
@@ -32,161 +38,166 @@ export default function AccountPage() {
   })
 
   const handleLogout = () => {
-    logout()
-    queryClient.clear()
-    navigate('/auth')
+    logoutApi()
+      .catch(() => undefined)
+      .finally(() => {
+        logout()
+        queryClient.clear()
+        navigate('/auth')
+      })
   }
 
-  if (isLoading) return <div className="flex items-center justify-center h-64 text-[#86868b] text-sm">Loading…</div>
-  if (isError || !user) return <div className="flex items-center justify-center h-64 text-[#86868b] text-sm">Could not load account info.</div>
+  if (isLoading) return <div className="flex items-center justify-center h-64 text-[var(--color-apple-tertiary)] text-sm">Loading...</div>
+  if (isError || !user) return <div className="flex items-center justify-center h-64 text-[var(--color-apple-tertiary)] text-sm">Could not load account info.</div>
 
   const name = user?.display_name || ''
   const color = avatarColor(name)
 
   return (
     <div>
-      {/* Header */}
-      <div className="bg-white border-b border-[#e8e8ed] px-8 py-5 sticky top-0 z-10">
-        <h1 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">Account</h1>
-      </div>
+      <PageHeader title="Account" />
 
-      <div className="px-8 py-8 max-w-3xl mx-auto space-y-5">
-
-        {/* Guest banner */}
+      <PageContainer className="space-y-5">
         {isGuest && (
-          <div className="bg-[#fff9e6] border border-[#ffd60a] rounded-2xl px-5 py-4 flex items-start gap-3">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b8860b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
+          <Card className="bg-[var(--color-apple-caution-bg)] border-[var(--color-apple-caution-border)] px-5 py-4 flex items-start gap-3">
             <div className="flex-1">
-              <p className="text-sm font-medium text-[#7a5c00]">You're using a guest session</p>
-              <p className="text-xs text-[#a07800] mt-0.5">Your data will be lost when you close this tab. Create an account to save your splits.</p>
-              <button
+              <p className="text-sm font-medium text-[var(--color-apple-caution-text)]">You're using a guest session</p>
+              <p className="text-xs text-[var(--color-apple-caution-subtext)] mt-0.5">Your data will be lost when you close this tab. Create an account to save your splits.</p>
+              <Button
                 onClick={() => { logout(); queryClient.clear(); navigate('/auth') }}
-                className="mt-3 bg-[#0071e3] text-white text-xs font-medium px-4 py-2 rounded-xl border-none cursor-pointer hover:bg-[#0077ed] transition-colors"
+                className="mt-3"
               >
                 Create account
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         )}
 
-        {/* Avatar + name */}
         <div className="flex items-center gap-5">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shrink-0"
-            style={{ background: color.bg, color: color.text }}
-          >
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shrink-0" style={{ background: color.bg, color: color.text }}>
             {name[0]?.toUpperCase()}
           </div>
           <div>
-            <p className="text-lg font-semibold text-[#1d1d1f]">{name}</p>
-            {!isGuest && <p className="text-sm text-[#86868b]">{user?.email}</p>}
-            {isGuest && <p className="text-sm text-[#86868b]">Guest session</p>}
+            <p className="text-lg font-semibold text-[var(--color-apple-text)]">{name}</p>
+            {!isGuest && <p className="text-sm text-[var(--color-apple-tertiary)]">{user?.email}</p>}
+            {isGuest && <p className="text-sm text-[var(--color-apple-tertiary)]">Guest session</p>}
           </div>
         </div>
 
-        {/* Profile info — only for real accounts */}
         {!isGuest && (
-          <div className="bg-white rounded-2xl border border-[#e8e8ed] overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#f2f2f7]">
-              <p className="text-xs font-semibold text-[#86868b] uppercase tracking-widest">Profile</p>
+          <Card className="overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-divider)]">
+              <p className="text-xs font-semibold text-[var(--color-apple-tertiary)] uppercase tracking-widest">Profile</p>
               {!profileEditing && (
-                <button onClick={() => { setDisplayName(user?.display_name || ''); setEmail(user?.email || ''); setProfileEditing(true) }} className={iconBtnEdit} title="Edit profile">
-                  <IconPencil />
-                </button>
+                <IconButton onClick={() => { setDisplayName(user?.display_name || ''); setEmail(user?.email || ''); setProfileEditing(true) }} variant="edit" title="Edit profile">
+                  <IconPencil size={14} />
+                </IconButton>
               )}
             </div>
 
             {profileEditing ? (
               <div className="p-5 space-y-3">
                 <div>
-                  <label className="text-xs text-[#86868b] mb-1 block">Display name</label>
-                  <input value={displayName} onChange={e => setDisplayName(e.target.value)} autoFocus className="w-full border border-[#d2d2d7] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0071e3]" />
+                  <label className="text-xs text-[var(--color-apple-tertiary)] mb-1 block">Display name</label>
+                  <Input value={displayName} onChange={e => setDisplayName(e.target.value)} autoFocus className="bg-white" />
                 </div>
                 <div>
-                  <label className="text-xs text-[#86868b] mb-1 block">Email</label>
-                  <input value={email} onChange={e => setEmail(e.target.value)} type="email" className="w-full border border-[#d2d2d7] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0071e3]" />
+                  <label className="text-xs text-[var(--color-apple-tertiary)] mb-1 block">Email</label>
+                  <Input value={email} onChange={e => setEmail(e.target.value)} type="email" className="bg-white" />
                 </div>
                 {updateMutation.isError && (
-                  <p className="text-xs text-[#ff3b30]">{(updateMutation.error as any)?.response?.data?.detail || 'Failed to update'}</p>
+                  <p className="text-xs text-[var(--color-apple-red)]">{(updateMutation.error as any)?.response?.data?.detail || 'Failed to update'}</p>
                 )}
                 <div className="flex gap-2 pt-1">
-                  <button onClick={() => { const c: any = {}; if (displayName.trim() !== user?.display_name) c.display_name = displayName.trim(); if (email.trim() !== user?.email) c.email = email.trim(); if (Object.keys(c).length) updateMutation.mutate(c); else setProfileEditing(false) }} disabled={updateMutation.isPending || !displayName.trim()} className="bg-[#0071e3] text-white px-5 py-2.5 rounded-xl text-sm font-medium disabled:opacity-40 hover:bg-[#0077ed] transition-colors">
-                    {updateMutation.isPending ? 'Saving…' : 'Save'}
-                  </button>
-                  <button onClick={() => setProfileEditing(false)} className="text-sm text-[#86868b] px-4 py-2.5 hover:text-[#1d1d1f] transition-colors">Cancel</button>
+                  <Button onClick={() => {
+                    const c: any = {}
+                    if (displayName.trim() !== user?.display_name) c.display_name = displayName.trim()
+                    if (email.trim() !== user?.email) c.email = email.trim()
+                    if (Object.keys(c).length) updateMutation.mutate(c)
+                    else setProfileEditing(false)
+                  }} disabled={updateMutation.isPending || !displayName.trim()}>
+                    {updateMutation.isPending ? 'Saving...' : 'Save'}
+                  </Button>
+                  <Button onClick={() => setProfileEditing(false)} variant="ghost">Cancel</Button>
                 </div>
               </div>
             ) : (
-              <div className="divide-y divide-[#f2f2f7]">
+              <div className="divide-y divide-[var(--color-divider)]">
                 <div className="flex items-center justify-between px-5 py-3.5">
-                  <span className="text-sm text-[#86868b]">Name</span>
-                  <span className="text-sm font-medium text-[#1d1d1f]">{user?.display_name}</span>
+                  <span className="text-sm text-[var(--color-apple-tertiary)]">Name</span>
+                  <span className="text-sm font-medium text-[var(--color-apple-text)]">{user?.display_name}</span>
                 </div>
                 <div className="flex items-center justify-between px-5 py-3.5">
-                  <span className="text-sm text-[#86868b]">Email</span>
-                  <span className="text-sm font-medium text-[#1d1d1f]">{user?.email}</span>
+                  <span className="text-sm text-[var(--color-apple-tertiary)]">Email</span>
+                  <span className="text-sm font-medium text-[var(--color-apple-text)]">{user?.email}</span>
                 </div>
               </div>
             )}
-          </div>
+          </Card>
         )}
 
-        {/* Password — only for real accounts */}
         {!isGuest && (
-          <div className="bg-white rounded-2xl border border-[#e8e8ed] overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#f2f2f7]">
-              <p className="text-xs font-semibold text-[#86868b] uppercase tracking-widest">Password</p>
+          <Card className="overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-divider)]">
+              <p className="text-xs font-semibold text-[var(--color-apple-tertiary)] uppercase tracking-widest">Password</p>
               {!passwordEditing && (
-                <button onClick={() => setPasswordEditing(true)} className={iconBtnEdit} title="Change password">
-                  <IconPencil />
-                </button>
+                <IconButton onClick={() => setPasswordEditing(true)} variant="edit" title="Change password">
+                  <IconPencil size={14} />
+                </IconButton>
               )}
             </div>
 
             {passwordEditing ? (
               <div className="p-5 space-y-3">
-                <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Current password" autoFocus className="w-full border border-[#d2d2d7] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0071e3]" />
-                <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password" className="w-full border border-[#d2d2d7] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0071e3]" />
-                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm new password" className="w-full border border-[#d2d2d7] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0071e3]" />
-                {newPassword && confirmPassword && newPassword !== confirmPassword && <p className="text-xs text-[#ff3b30]">Passwords don't match</p>}
-                {newPassword.length > 0 && newPassword.length < 6 && <p className="text-xs text-[#ff3b30]">At least 6 characters required</p>}
-                {passwordMutation.isError && <p className="text-xs text-[#ff3b30]">{(passwordMutation.error as any)?.response?.data?.detail || 'Failed to update password'}</p>}
-                {passwordMutation.isSuccess && <p className="text-xs text-[#34c759] font-medium">✓ Password updated</p>}
+                <Input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Current password" autoFocus className="bg-white" />
+                <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password" className="bg-white" />
+                <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm new password" className="bg-white" />
+                {newPassword && confirmPassword && newPassword !== confirmPassword && <p className="text-xs text-[var(--color-apple-red)]">Passwords do not match</p>}
+                {newPassword.length > 0 && newPassword.length < 6 && <p className="text-xs text-[var(--color-apple-red)]">At least 6 characters required</p>}
+                {passwordMutation.isError && <p className="text-xs text-[var(--color-apple-red)]">{(passwordMutation.error as any)?.response?.data?.detail || 'Failed to update password'}</p>}
+                {passwordMutation.isSuccess && <p className="text-xs text-[var(--color-apple-green)] font-medium">Password updated</p>}
                 <div className="flex gap-2 pt-1">
-                  <button onClick={() => passwordMutation.mutate({ current_password: currentPassword, new_password: newPassword })} disabled={passwordMutation.isPending || !currentPassword || newPassword.length < 6 || newPassword !== confirmPassword} className="bg-[#0071e3] text-white px-5 py-2.5 rounded-xl text-sm font-medium disabled:opacity-40 hover:bg-[#0077ed] transition-colors">
-                    {passwordMutation.isPending ? 'Saving…' : 'Update password'}
-                  </button>
-                  <button onClick={() => { setPasswordEditing(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword('') }} className="text-sm text-[#86868b] px-4 py-2.5 hover:text-[#1d1d1f] transition-colors">Cancel</button>
+                  <Button
+                    onClick={() => passwordMutation.mutate({ current_password: currentPassword, new_password: newPassword })}
+                    disabled={passwordMutation.isPending || !currentPassword || newPassword.length < 6 || newPassword !== confirmPassword}
+                  >
+                    {passwordMutation.isPending ? 'Saving...' : 'Update password'}
+                  </Button>
+                  <Button onClick={() => { setPasswordEditing(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword('') }} variant="ghost">Cancel</Button>
                 </div>
               </div>
             ) : (
               <div className="px-5 py-3.5">
-                <span className="text-sm text-[#aeaeb2]">••••••••</span>
+                <span className="text-sm text-[var(--color-caption)]">••••••••</span>
               </div>
             )}
-          </div>
+          </Card>
         )}
 
-        {/* Sign out */}
-        <div className="bg-white rounded-2xl border border-[#e8e8ed] overflow-hidden">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-5 py-4 text-sm font-medium text-[#ff3b30] hover:bg-[#fff2f2] transition-colors text-left"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            {isGuest ? 'End guest session' : 'Sign out'}
-          </button>
-        </div>
-
-      </div>
+        <Card className="overflow-hidden">
+          <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-[var(--color-apple-red)] hover:text-[var(--color-apple-red)] hover:bg-[var(--color-apple-danger-bg)] rounded-none px-5 py-4">
+            <IconTrash size={16} />
+            {isGuest ? 'End guest session' : 'Sign out (this device)'}
+          </Button>
+          {!isGuest && (
+            <Button
+              onClick={() => {
+                logoutAllApi()
+                  .catch(() => undefined)
+                  .finally(() => {
+                    logout()
+                    queryClient.clear()
+                    navigate('/auth')
+                  })
+              }}
+              variant="ghost"
+              className="w-full justify-start rounded-none px-5 py-4 border-t border-[var(--color-divider)]"
+            >
+              Sign out all devices
+            </Button>
+          )}
+        </Card>
+      </PageContainer>
     </div>
   )
 }

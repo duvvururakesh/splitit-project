@@ -1,5 +1,24 @@
-const AVATAR_BG = ['#b8d4f0', '#b8e6c8', '#ffd9a8', '#ffc4c4', '#c8c4f0', '#e0c4f0', '#ffc4d8', '#b8e0f0']
-const AVATAR_FG = ['#1a5fa0', '#1a7a3a', '#a05a00', '#a02020', '#3a3080', '#6a2080', '#a02050', '#1a6080']
+const AVATAR_BG = [
+  'var(--color-avatar-bg-1)',
+  'var(--color-avatar-bg-2)',
+  'var(--color-avatar-bg-3)',
+  'var(--color-avatar-bg-4)',
+  'var(--color-avatar-bg-5)',
+  'var(--color-avatar-bg-6)',
+  'var(--color-avatar-bg-7)',
+  'var(--color-avatar-bg-8)',
+]
+
+const AVATAR_FG = [
+  'var(--color-avatar-fg-1)',
+  'var(--color-avatar-fg-2)',
+  'var(--color-avatar-fg-3)',
+  'var(--color-avatar-fg-4)',
+  'var(--color-avatar-fg-5)',
+  'var(--color-avatar-fg-6)',
+  'var(--color-avatar-fg-7)',
+  'var(--color-avatar-fg-8)',
+]
 
 export function avatarColor(name: string): { bg: string; text: string } {
   let h = 0

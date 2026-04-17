@@ -7,12 +7,15 @@ from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.models.friendship import Friendship
 from app.schemas.friends import FriendRequest, FriendUserResponse, FriendshipResponse
+from app.services.balance import get_balances_for_user
 
 router = APIRouter(prefix="/friends", tags=["friends"])
 
 
 def _make_friend_response(friendship: Friendship, current_user_id) -> FriendshipResponse:
     friend = friendship.addressee if str(friendship.requester_id) == str(current_user_id) else friendship.requester
+    balances = getattr(friendship, "_balance_map", {})
+    balance = float(balances.get(str(friend.id), 0.0))
     return FriendshipResponse(
         id=str(friendship.id),
         status=friendship.status,
@@ -21,13 +24,14 @@ def _make_friend_response(friendship: Friendship, current_user_id) -> Friendship
             display_name=friend.display_name,
             email=friend.email,
             avatar_url=friend.avatar_url,
-            balance=0.0,  # balances come in Stage 3
+            balance=round(balance, 2),
         ),
     )
 
 
 @router.get("/", response_model=list[FriendshipResponse])
 def list_friends(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    balance_map = get_balances_for_user(str(current_user.id), db)
     friendships = db.query(Friendship).filter(
         or_(
             Friendship.requester_id == current_user.id,
@@ -35,6 +39,8 @@ def list_friends(current_user: User = Depends(get_current_user), db: Session = D
         ),
         Friendship.status == "accepted",
     ).all()
+    for f in friendships:
+        setattr(f, "_balance_map", balance_map)
     return [_make_friend_response(f, current_user.id) for f in friendships]
 
 

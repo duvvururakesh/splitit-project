@@ -7,6 +7,7 @@ import ActivityPage from './pages/Activity/ActivityPage'
 import BillSplitPage from './pages/Split/BillSplitPage'
 import ContactsPage from './pages/Contacts/ContactsPage'
 import AccountPage from './pages/Account/AccountPage'
+import DashboardPage from './pages/Dashboard/DashboardPage'
 
 const queryClient = new QueryClient()
 
@@ -23,12 +24,13 @@ export default function App() {
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-            <Route path="/" element={<Navigate to="/split" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/split" element={<BillSplitPage />} />
             <Route path="/contacts" element={<ContactsPage />} />
             <Route path="/activity" element={<ActivityPage />} />
             <Route path="/account" element={<AccountPage />} />
-            <Route path="*" element={<Navigate to="/split" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

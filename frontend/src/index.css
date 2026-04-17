@@ -18,18 +18,54 @@
   --color-apple-sidebar-active: #e8e8ed;
 
   /* Extended tokens — used frequently but were previously unhardcoded */
-  --color-card-border: #e8e8ed;    /* card outlines, page section borders */
-  --color-divider: #f2f2f7;        /* list row dividers */
-  --color-chip-bg: #f2f2f7;        /* pill/tag/chip background */
-  --color-chip-text: #3a3a3c;      /* pill/tag/chip foreground */
-  --color-caption: #aeaeb2;        /* light captions, timestamps */
-  --color-input-bg: #f9f9f9;       /* input field background */
-  --color-apple-green-bg: #edfaf1; /* success state background */
-  --color-apple-orange: #ff9500;   /* warning / tax accent (alias) */
-  --color-apple-tax-bg: #fff5e6;   /* tax badge background */
-  --color-apple-tax-text: #b35a00; /* tax badge foreground */
-  --color-apple-tip-bg: #e8f1fb;   /* tip badge background (reuses blue-light) */
-  --color-apple-tip-text: #1a6080; /* tip badge foreground */
+  --color-card-border: #e8e8ed;
+  --color-divider: #f2f2f7;
+  --color-chip-bg: #f2f2f7;
+  --color-chip-text: #3a3a3c;
+  --color-chip-text-strong: #48484a;
+  --color-caption: #aeaeb2;
+  --color-input-bg: #f9f9f9;
+  --color-sidebar-hover: #f0f0f2;
+  --color-apple-green-bg: #edfaf1;
+  --color-apple-tax-bg: #fff5e6;
+  --color-apple-tax-text: #b35a00;
+  --color-apple-tip-bg: #e8f1fb;
+  --color-apple-tip-text: #1a6080;
+  --color-apple-success-text: #1a7a3a;
+  --color-apple-warm-bg: #fff0eb;
+  --color-apple-warm-icon: #e8784a;
+  --color-apple-danger-bg: #fff2f2;
+  --color-apple-danger-border: #ffd0d0;
+  --color-apple-danger-soft: #ffe5e5;
+  --color-apple-red-hover: #e6352b;
+  --color-apple-warning-border: #ffd9a8;
+  --color-apple-warning-bg-2: #fff8ec;
+  --color-apple-warning-border-2: #ffd070;
+  --color-apple-warning-text-2: #7d4e00;
+  --color-apple-caution-bg: #fff9e6;
+  --color-apple-caution-border: #ffd60a;
+  --color-apple-caution-text: #7a5c00;
+  --color-apple-caution-subtext: #a07800;
+  --color-apple-blue-tint: #fafcff;
+  --color-apple-blue-tint-2: #f0f7ff;
+  --color-apple-green-tint: #f0fdf4;
+  --color-scrollbar-thumb: #c7c7cc;
+  --color-avatar-bg-1: #b8d4f0;
+  --color-avatar-bg-2: #b8e6c8;
+  --color-avatar-bg-3: #ffd9a8;
+  --color-avatar-bg-4: #ffc4c4;
+  --color-avatar-bg-5: #c8c4f0;
+  --color-avatar-bg-6: #e0c4f0;
+  --color-avatar-bg-7: #ffc4d8;
+  --color-avatar-bg-8: #b8e0f0;
+  --color-avatar-fg-1: #1a5fa0;
+  --color-avatar-fg-2: #1a7a3a;
+  --color-avatar-fg-3: #a05a00;
+  --color-avatar-fg-4: #a02020;
+  --color-avatar-fg-5: #3a3080;
+  --color-avatar-fg-6: #6a2080;
+  --color-avatar-fg-7: #a02050;
+  --color-avatar-fg-8: #1a6080;
 }
 
 * {
@@ -45,8 +81,8 @@ html {
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-  background-color: #f5f5f7;
-  color: #1d1d1f;
+  background-color: var(--color-apple-bg);
+  color: var(--color-apple-text);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -54,8 +90,8 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #aeaeb2; }
+::-webkit-scrollbar-thumb { background: var(--color-scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-caption); }
 
 /* Inputs */
 input, textarea, select {

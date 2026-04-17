@@ -1,57 +1,47 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { avatarColor } from '../../utils/avatar'
+import Button from '../ui/Button'
+import { IconActivity, IconPlus, IconReceipt, IconUser, IconUsers } from '../../utils/icons'
+import { getMe, logoutApi } from '../../api/auth'
+import { useAuthStore } from '../../store/auth.store'
 
 const links = [
-  {
-    to: '/split',
-    label: 'Bill Calculator',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="20" height="18" rx="2"/>
-        <line x1="8" y1="9" x2="16" y2="9"/>
-        <line x1="8" y1="13" x2="16" y2="13"/>
-        <line x1="8" y1="17" x2="12" y2="17"/>
-      </svg>
-    ),
-  },
-  {
-    to: '/contacts',
-    label: 'Contacts',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    ),
-  },
-  {
-    to: '/activity',
-    label: 'Activity',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>
-    ),
-  },
+  { to: '/dashboard', label: 'Dashboard', icon: <IconActivity /> },
+  { to: '/split', label: 'Bill Calculator', icon: <IconReceipt /> },
+  { to: '/contacts', label: 'Contacts', icon: <IconUsers /> },
+  { to: '/activity', label: 'Saved Splits', icon: <IconActivity /> },
 ]
 
 export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const me = null
+  const queryClient = useQueryClient()
+  const { logout } = useAuthStore()
+  const { data: me } = useQuery({
+    queryKey: ['me'],
+    queryFn: getMe,
+    retry: false,
+  })
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi()
+    } catch {
+      // clear local auth state even if server logout fails
+    } finally {
+      logout()
+      queryClient.clear()
+      navigate('/auth')
+    }
+  }
 
   return (
-    <aside className="w-[220px] shrink-0 bg-[#f9f9f9] border-r border-[#e8e8ed] flex flex-col h-screen sticky top-0">
-      {/* Logo */}
-      <div className="px-5 py-[18px] border-b border-[#e8e8ed]">
-        <span className="text-[17px] font-semibold text-[#1d1d1f] tracking-[-0.3px]">
-          Splitit
-        </span>
+    <aside className="hidden md:flex w-[220px] shrink-0 bg-[var(--color-apple-sidebar)] border-r border-[var(--color-card-border)] flex-col h-screen sticky top-0">
+      <div className="px-5 py-[18px] border-b border-[var(--color-card-border)]">
+        <span className="text-base font-semibold text-[var(--color-apple-text)]">Splitit</span>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 p-2.5">
         {links.map(({ to, label, icon }) => (
           <NavLink
@@ -61,8 +51,8 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm mb-0.5 transition-all no-underline ${
                 isActive
-                  ? 'font-medium text-[#1d1d1f] bg-[#e8e8ed]'
-                  : 'font-normal text-[#6e6e73] hover:bg-[#f0f0f2] hover:text-[#1d1d1f]'
+                  ? 'font-medium text-[var(--color-apple-text)] bg-[var(--color-card-border)]'
+                  : 'font-normal text-[var(--color-apple-secondary)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-apple-text)]'
               }`
             }
           >
@@ -72,10 +62,8 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Bottom actions */}
-      <div className="px-2.5 pb-5 pt-3 border-t border-[#e8e8ed] space-y-1">
-        {/* New split button */}
-        <button
+      <div className="px-2.5 pb-5 pt-3 border-t border-[var(--color-card-border)] space-y-1">
+        <Button
           onClick={() => {
             if (location.pathname === '/split' && !location.search) {
               window.dispatchEvent(new CustomEvent('splitit:new-split'))
@@ -83,23 +71,19 @@ export default function Sidebar() {
               navigate('/split')
             }
           }}
-          className="flex items-center justify-center gap-1.5 w-full bg-[#0071e3] text-white text-sm font-medium px-4 py-2.5 rounded-full border-none cursor-pointer mb-2.5 hover:bg-[#0077ed] transition-colors"
+          className="w-full rounded-xl"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <IconPlus size={14} />
           New split
-        </button>
+        </Button>
 
-        {/* Account link */}
         <NavLink
           to="/account"
           className={({ isActive }) =>
             `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all no-underline ${
               isActive
-                ? 'font-medium text-[#1d1d1f] bg-[#e8e8ed]'
-                : 'font-normal text-[#6e6e73] hover:bg-[#f0f0f2] hover:text-[#1d1d1f]'
+                ? 'font-medium text-[var(--color-apple-text)] bg-[var(--color-card-border)]'
+                : 'font-normal text-[var(--color-apple-secondary)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-apple-text)]'
             }`
           }
         >
@@ -111,13 +95,17 @@ export default function Sidebar() {
               {me.display_name[0].toUpperCase()}
             </div>
           ) : (
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
+            <IconUser />
           )}
           {me?.display_name || 'Account'}
         </NavLink>
+
+        <button
+          onClick={handleLogout}
+          className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all no-underline text-[var(--color-apple-red)] hover:bg-[var(--color-apple-danger-bg)]"
+        >
+          Sign out
+        </button>
       </div>
     </aside>
   )

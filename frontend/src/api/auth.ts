@@ -16,6 +16,9 @@ export const register = (email: string, password: string, display_name: string) 
 
 export const getMe = () => client.get('/auth/me').then(r => r.data)
 
+export const logoutApi = () => client.post('/auth/logout').then(r => r.data)
+export const logoutAllApi = () => client.post('/auth/logout-all').then(r => r.data)
+
 export const updateMe = (data: {
   display_name?: string
   email?: string

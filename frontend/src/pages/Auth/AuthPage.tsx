@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { guestLogin, login, register, forgotPassword, resetPassword } from '../../api/auth'
 import { useAuthStore } from '../../store/auth.store'
+import Card from '../../components/ui/Card'
+import Button from '../../components/ui/Button'
+import Input from '../../components/ui/Input'
+import { IconReceipt, IconUser } from '../../utils/icons'
 
 type Mode = 'landing' | 'signin' | 'register' | 'forgot' | 'reset'
 
@@ -10,10 +14,7 @@ export default function AuthPage() {
   const [searchParams] = useSearchParams()
   const { setGuestToken, setToken } = useAuthStore()
 
-  const [mode, setMode] = useState<Mode>(() => {
-    return searchParams.get('reset_token') ? 'reset' : 'landing'
-  })
-
+  const [mode, setMode] = useState<Mode>(() => searchParams.get('reset_token') ? 'reset' : 'landing')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -49,7 +50,7 @@ export default function AuthPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password !== confirmPassword) { setError("Passwords don't match"); return }
+    if (password !== confirmPassword) { setError("Passwords do not match"); return }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     setLoading(true); setError('')
     try {
@@ -64,14 +65,14 @@ export default function AuthPage() {
     e.preventDefault(); setLoading(true); setError(''); setSuccess('')
     try {
       await forgotPassword(email)
-      setSuccess('Check your email for a reset link. (During development, check the backend console for the token.)')
+      setSuccess('Check your email for a reset link. During development, check backend logs for token.')
     } catch { setError('Something went wrong. Please try again.') }
     finally { setLoading(false) }
   }
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (newPassword !== confirmNewPassword) { setError("Passwords don't match"); return }
+    if (newPassword !== confirmNewPassword) { setError("Passwords do not match"); return }
     if (newPassword.length < 6) { setError('Password must be at least 6 characters'); return }
     setLoading(true); setError('')
     try {
@@ -82,125 +83,90 @@ export default function AuthPage() {
     finally { setLoading(false) }
   }
 
-  const inputClass = 'w-full border border-[#d2d2d7] rounded-xl px-4 py-3 text-sm text-[#1d1d1f] bg-white focus:outline-none focus:ring-2 focus:ring-[#0071e3] placeholder-[#aeaeb2]'
-
   return (
-    <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--color-apple-bg)] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-
-        {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#0071e3] mb-4">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="3" width="20" height="18" rx="2"/>
-              <line x1="8" y1="9" x2="16" y2="9"/>
-              <line x1="8" y1="13" x2="16" y2="13"/>
-              <line x1="8" y1="17" x2="12" y2="17"/>
-            </svg>
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[var(--color-apple-blue)] mb-4 text-white">
+            <IconReceipt size={24} />
           </div>
-          <h1 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">Splitit</h1>
-          <p className="text-sm text-[#86868b] mt-1">Split bills without the awkward math</p>
+          <h1 className="text-2xl font-semibold text-[var(--color-apple-text)] tracking-tight">Splitit</h1>
+          <p className="text-sm text-[var(--color-apple-tertiary)] mt-1">Split bills without the awkward math</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#e8e8ed] overflow-hidden shadow-sm">
-
-          {/* LANDING */}
+        <Card className="overflow-hidden shadow-sm">
           {mode === 'landing' && (
             <div className="p-6 space-y-3">
-              <button onClick={handleGuest} disabled={loading} className="w-full flex items-center justify-center gap-2 bg-[#f2f2f7] text-[#1d1d1f] text-sm font-medium px-4 py-3.5 rounded-xl border-none cursor-pointer hover:bg-[#e8e8ed] transition-colors disabled:opacity-50">
-                {loading ? 'Starting…' : (<>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  Continue as Guest
-                </>)}
-              </button>
-              <p className="text-xs text-center text-[#aeaeb2]">Guest sessions are temporary — data is lost when you close the tab</p>
+              <Button onClick={handleGuest} disabled={loading} variant="secondary" className="w-full">
+                {loading ? 'Starting...' : (<><IconUser size={15} />Continue as Guest</>)}
+              </Button>
+              <p className="text-xs text-center text-[var(--color-caption)]">Guest sessions are temporary and will be lost when the tab closes</p>
               <div className="flex items-center gap-3 py-1">
-                <div className="flex-1 h-px bg-[#e8e8ed]"/>
-                <span className="text-xs text-[#aeaeb2]">or</span>
-                <div className="flex-1 h-px bg-[#e8e8ed]"/>
+                <div className="flex-1 h-px bg-[var(--color-card-border)]" />
+                <span className="text-xs text-[var(--color-caption)]">or</span>
+                <div className="flex-1 h-px bg-[var(--color-card-border)]" />
               </div>
-              <button onClick={() => reset('signin')} className="w-full bg-[#0071e3] text-white text-sm font-medium px-4 py-3.5 rounded-xl border-none cursor-pointer hover:bg-[#0077ed] transition-colors">Sign in</button>
-              <button onClick={() => reset('register')} className="w-full bg-white text-[#0071e3] text-sm font-medium px-4 py-3.5 rounded-xl border border-[#0071e3] cursor-pointer hover:bg-[#f0f7ff] transition-colors">Create account</button>
-              {error && <p className="text-xs text-[#ff3b30] text-center">{error}</p>}
+              <Button onClick={() => reset('signin')} className="w-full">Sign in</Button>
+              <Button onClick={() => reset('register')} variant="ghost" className="w-full border border-[var(--color-apple-blue)] text-[var(--color-apple-blue)] hover:bg-[var(--color-apple-blue-tint-2)]">Create account</Button>
+              {error && <p className="text-xs text-[var(--color-apple-red)] text-center">{error}</p>}
             </div>
           )}
 
-          {/* SIGN IN */}
           {mode === 'signin' && (
             <form onSubmit={handleSignIn} className="p-6 space-y-3">
-              <h2 className="text-base font-semibold text-[#1d1d1f] mb-4">Sign in</h2>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required autoFocus className={inputClass} />
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required className={inputClass} />
+              <h2 className="text-base font-semibold text-[var(--color-apple-text)] mb-4">Sign in</h2>
+              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required autoFocus className="bg-white" />
+              <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required className="bg-white" />
               <div className="text-right">
-                <button type="button" onClick={() => reset('forgot')} className="text-xs text-[#0071e3] border-none bg-transparent cursor-pointer hover:underline p-0">
-                  Forgot password?
-                </button>
+                <button type="button" onClick={() => reset('forgot')} className="text-xs text-[var(--color-apple-blue)] border-none bg-transparent cursor-pointer hover:underline p-0">Forgot password?</button>
               </div>
-              {error && <p className="text-xs text-[#ff3b30]">{error}</p>}
-              <button type="submit" disabled={loading || !email || !password} className="w-full bg-[#0071e3] text-white text-sm font-medium px-4 py-3.5 rounded-xl border-none cursor-pointer hover:bg-[#0077ed] transition-colors disabled:opacity-40">
-                {loading ? 'Signing in…' : 'Sign in'}
-              </button>
-              <button type="button" onClick={() => reset('landing')} className="w-full text-sm text-[#86868b] py-2 hover:text-[#1d1d1f] transition-colors border-none bg-transparent cursor-pointer">← Back</button>
-              <p className="text-xs text-center text-[#86868b]">No account?{' '}<button type="button" onClick={() => reset('register')} className="text-[#0071e3] border-none bg-transparent cursor-pointer hover:underline p-0 text-xs">Create one</button></p>
+              {error && <p className="text-xs text-[var(--color-apple-red)]">{error}</p>}
+              <Button type="submit" disabled={loading || !email || !password} className="w-full">{loading ? 'Signing in...' : 'Sign in'}</Button>
+              <Button type="button" onClick={() => reset('landing')} variant="ghost" className="w-full">Back</Button>
+              <p className="text-xs text-center text-[var(--color-apple-tertiary)]">No account? <button type="button" onClick={() => reset('register')} className="text-[var(--color-apple-blue)] border-none bg-transparent cursor-pointer hover:underline p-0 text-xs">Create one</button></p>
             </form>
           )}
 
-          {/* REGISTER */}
           {mode === 'register' && (
             <form onSubmit={handleRegister} className="p-6 space-y-3">
-              <h2 className="text-base font-semibold text-[#1d1d1f] mb-4">Create account</h2>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required autoFocus className={inputClass} />
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required className={inputClass} />
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password (min 6 characters)" required className={inputClass} />
-              <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm password" required className={inputClass} />
-              {error && <p className="text-xs text-[#ff3b30]">{error}</p>}
-              <button type="submit" disabled={loading || !name || !email || !password || !confirmPassword} className="w-full bg-[#0071e3] text-white text-sm font-medium px-4 py-3.5 rounded-xl border-none cursor-pointer hover:bg-[#0077ed] transition-colors disabled:opacity-40">
-                {loading ? 'Creating account…' : 'Create account'}
-              </button>
-              <button type="button" onClick={() => reset('landing')} className="w-full text-sm text-[#86868b] py-2 hover:text-[#1d1d1f] transition-colors border-none bg-transparent cursor-pointer">← Back</button>
-              <p className="text-xs text-center text-[#86868b]">Already have an account?{' '}<button type="button" onClick={() => reset('signin')} className="text-[#0071e3] border-none bg-transparent cursor-pointer hover:underline p-0 text-xs">Sign in</button></p>
+              <h2 className="text-base font-semibold text-[var(--color-apple-text)] mb-4">Create account</h2>
+              <Input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required autoFocus className="bg-white" />
+              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required className="bg-white" />
+              <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password (min 6 characters)" required className="bg-white" />
+              <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm password" required className="bg-white" />
+              {error && <p className="text-xs text-[var(--color-apple-red)]">{error}</p>}
+              <Button type="submit" disabled={loading || !name || !email || !password || !confirmPassword} className="w-full">{loading ? 'Creating account...' : 'Create account'}</Button>
+              <Button type="button" onClick={() => reset('landing')} variant="ghost" className="w-full">Back</Button>
+              <p className="text-xs text-center text-[var(--color-apple-tertiary)]">Already have an account? <button type="button" onClick={() => reset('signin')} className="text-[var(--color-apple-blue)] border-none bg-transparent cursor-pointer hover:underline p-0 text-xs">Sign in</button></p>
             </form>
           )}
 
-          {/* FORGOT PASSWORD */}
           {mode === 'forgot' && (
             <form onSubmit={handleForgot} className="p-6 space-y-3">
-              <h2 className="text-base font-semibold text-[#1d1d1f]">Reset password</h2>
-              <p className="text-xs text-[#86868b]">Enter your email and we'll send you a reset link.</p>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required autoFocus className={inputClass} />
-              {error && <p className="text-xs text-[#ff3b30]">{error}</p>}
-              {success && <p className="text-xs text-[#34c759]">{success}</p>}
-              {!success && (
-                <button type="submit" disabled={loading || !email} className="w-full bg-[#0071e3] text-white text-sm font-medium px-4 py-3.5 rounded-xl border-none cursor-pointer hover:bg-[#0077ed] transition-colors disabled:opacity-40">
-                  {loading ? 'Sending…' : 'Send reset link'}
-                </button>
-              )}
-              {success && (
-                <button type="button" onClick={() => reset('reset')} className="w-full bg-[#f2f2f7] text-[#1d1d1f] text-sm font-medium px-4 py-3.5 rounded-xl border-none cursor-pointer hover:bg-[#e8e8ed] transition-colors">
-                  Enter reset token
-                </button>
-              )}
-              <button type="button" onClick={() => reset('signin')} className="w-full text-sm text-[#86868b] py-2 hover:text-[#1d1d1f] transition-colors border-none bg-transparent cursor-pointer">← Back to sign in</button>
+              <h2 className="text-base font-semibold text-[var(--color-apple-text)]">Reset password</h2>
+              <p className="text-xs text-[var(--color-apple-tertiary)]">Enter your email and we will send you a reset link.</p>
+              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" required autoFocus className="bg-white" />
+              {error && <p className="text-xs text-[var(--color-apple-red)]">{error}</p>}
+              {success && <p className="text-xs text-[var(--color-apple-green)]">{success}</p>}
+              {!success && <Button type="submit" disabled={loading || !email} className="w-full">{loading ? 'Sending...' : 'Send reset link'}</Button>}
+              {success && <Button type="button" onClick={() => reset('reset')} variant="secondary" className="w-full">Enter reset token</Button>}
+              <Button type="button" onClick={() => reset('signin')} variant="ghost" className="w-full">Back to sign in</Button>
             </form>
           )}
 
-          {/* RESET PASSWORD */}
           {mode === 'reset' && (
             <form onSubmit={handleReset} className="p-6 space-y-3">
-              <h2 className="text-base font-semibold text-[#1d1d1f]">Set new password</h2>
-              <input type="text" value={resetToken} onChange={e => setResetToken(e.target.value)} placeholder="Paste reset token here" required autoFocus className={inputClass} />
-              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password" required className={inputClass} />
-              <input type="password" value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} placeholder="Confirm new password" required className={inputClass} />
-              {error && <p className="text-xs text-[#ff3b30]">{error}</p>}
-              {success && <p className="text-xs text-[#34c759] font-medium">{success}</p>}
-              <button type="submit" disabled={loading || !resetToken || !newPassword || !confirmNewPassword} className="w-full bg-[#0071e3] text-white text-sm font-medium px-4 py-3.5 rounded-xl border-none cursor-pointer hover:bg-[#0077ed] transition-colors disabled:opacity-40">
-                {loading ? 'Updating…' : 'Update password'}
-              </button>
-              <button type="button" onClick={() => reset('signin')} className="w-full text-sm text-[#86868b] py-2 hover:text-[#1d1d1f] transition-colors border-none bg-transparent cursor-pointer">← Back to sign in</button>
+              <h2 className="text-base font-semibold text-[var(--color-apple-text)]">Set new password</h2>
+              <Input type="text" value={resetToken} onChange={e => setResetToken(e.target.value)} placeholder="Paste reset token here" required autoFocus className="bg-white" />
+              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password" required className="bg-white" />
+              <Input type="password" value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} placeholder="Confirm new password" required className="bg-white" />
+              {error && <p className="text-xs text-[var(--color-apple-red)]">{error}</p>}
+              {success && <p className="text-xs text-[var(--color-apple-green)] font-medium">{success}</p>}
+              <Button type="submit" disabled={loading || !resetToken || !newPassword || !confirmNewPassword} className="w-full">{loading ? 'Updating...' : 'Update password'}</Button>
+              <Button type="button" onClick={() => reset('signin')} variant="ghost" className="w-full">Back to sign in</Button>
             </form>
           )}
-
-        </div>
+        </Card>
       </div>
     </div>
   )
